@@ -83,6 +83,11 @@ def fetch_data(ticker_name):
 
 
 def save_to_cache(ticker_data_obj):
+    try:
+        os.mkdir(CACHE_LOC)
+    except FileExistsError:
+        pass
+    
     file_handle = open(
         f'./{CACHE_LOC}/{ticker_data_obj.ticker_name}.pkl', 'wb')
     pickle.dump(ticker_data_obj, file_handle)
