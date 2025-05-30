@@ -20,21 +20,21 @@ def parseDate(pd_timestamp):
 
 def read_data():
     ticker_objects = []
+    local_cnt = 0
+    fetched_names = []
 
     for name in TICKER_NAMES:
         cache_valid = True
         # attempt to read data from cache
         location_str = f'{CACHE_LOC}/{name}.pkl'
+        
+        # check if data is available locally and valid
         if (os.path.isfile(location_str)):
             file_handle = open(location_str, 'rb')
             ticker_data = pickle.load(file_handle)
-            # print(ticker_data.date_created.date())
-            # print(datetime.today().date())
 
             if (ticker_data.date_created.date() < datetime.today().date()):
                 cache_valid = False
-
-            print(f"Read {ticker_data.ticker_name} data from cache")
         else:
             cache_valid = False
 
@@ -42,12 +42,16 @@ def read_data():
         if (cache_valid == False):
             ticker_data = fetch_data(name)
             save_to_cache(ticker_data)
-            print(f"Fetched {ticker_data.ticker_name} data from yahoo API")
-        
+            fetched_names.append(ticker_data.ticker_name)
+        else:
+            local_cnt+=1
+
         ticker_objects.append(ticker_data)
 
     ticker_objects = sorted(
         ticker_objects, key=lambda entry: entry.ticker_name)
+
+    print(f'Read {local_cnt} tickers locally and fetched {fetched_names}')
 
     return ticker_objects
 
@@ -73,7 +77,6 @@ def fetch_data(ticker_name):
             low=row['High'],
         )
         object_entries.append(new_object)
-        # print(new_object)
 
     return TickerData(
         ticker_name=ticker_name,
@@ -87,7 +90,7 @@ def save_to_cache(ticker_data_obj):
         os.mkdir(CACHE_LOC)
     except FileExistsError:
         pass
-    
+
     file_handle = open(
         f'./{CACHE_LOC}/{ticker_data_obj.ticker_name}.pkl', 'wb')
     pickle.dump(ticker_data_obj, file_handle)

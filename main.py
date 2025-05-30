@@ -3,29 +3,37 @@ from lib.util import getTrendLine, getEntriesAboveLine
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import numpy as np
-# DATA_FOLDER = "./NASDAQ_11052025/"
-# from lib.read_nasdaq import read_data
-from lib.read_yfinance import read_data
 
+READ_LOCAL_NASDAQ = False
 
 if __name__ == "__main__":
-    # data_entries = read_data(DATA_FOLDER)
-    data_entries = read_data()
+    if (READ_LOCAL_NASDAQ):
+        from lib.read_nasdaq import read_data
+        data_entries = read_data("./NASDAQ_11052025/")
+    else:
+        from lib.read_yfinance import read_data
+        data_entries = read_data()
+
+    
     for entry_index in range(0, len(data_entries)):
         entry = data_entries[entry_index]
         print(f"[{entry_index}]: {entry}: {entry.getDateRange()}")
 
-    # arm start
-    arm_start, arm_end = data_entries[2].getDateRange()
-    arm_end = arm_end - timedelta(days=1)
-
-    # # extract index entries
+    # extract index entries
     index_entries = []
-    index_entries.append(data_entries.pop(12))
+    if (READ_LOCAL_NASDAQ):
+        index_entries.append(data_entries.pop(10))
+    else:
+        index_entries.append(data_entries.pop(12))
 
-    # # comparison = ComparisonEngine(data_entries, index_entries, arm_start, arm_end)  # nopep8
-    comparison = ComparisonEngine(data_entries, index_entries, datetime(2024, 6, 14), arm_end)  # nopep8
-    comparison.printMeta()
+
+    # arm start
+    stock_start, stock_end = data_entries[0].getDateRange()
+    stock_end = stock_end - timedelta(days=1)
+
+    # comparison = ComparisonEngine(data_entries, index_entries, arm_start, arm_end)  # nopep8
+    comparison = ComparisonEngine(data_entries, index_entries, datetime(2024, 6, 14), stock_end)  # nopep8
+    # comparison.printMeta()
 
     dates, names, changes = comparison.getPercentageChanges(include_indexes=False, req_names=[])  # nopep8
     dates, index_avg_changes = comparison.getAverageIndexChanges()
