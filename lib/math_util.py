@@ -18,6 +18,10 @@ def getTrendLine(data_points):
     return pred_y
 
 
+def getAverageDistance(line1, line2):
+    return round(float(np.average(line1-line2)*100), ndigits=2)
+
+
 def getAverageChanges(tickers):
     assert len(tickers) > 0
     dates = []
@@ -36,7 +40,7 @@ def getAverageChanges(tickers):
     return dates, avg_movement_data
 
 
-def getEntriesAboveLine(to_check, ref_line):
+def countEntriesAboveLine(to_check, ref_line):
     count = 0
     tmp = to_check - ref_line
 

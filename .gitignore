@@ -1,3 +1,4 @@
-yfinance_cache/*
+yfinance_cache
 __pycache__
 .DS_Store
+report_output

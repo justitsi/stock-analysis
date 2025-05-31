@@ -1,8 +1,9 @@
 import copy
 import numpy as np
-from lib.util import getAverageChanges
+from lib.math_util import getAverageChanges
 
-class ComparisonEngine:
+
+class TickerDataContainer:
     def __init__(self, ticker_data_list, index_data_list, startDate, endDate):
         self.startDate = startDate
         self.endDate = endDate
@@ -27,55 +28,68 @@ class ComparisonEngine:
         self.index_data_list = sorted(
             self.index_data_list, key=lambda d: d.ticker_name)
 
-
         # need to make sure all data has the same days present
+        # use for check that all tickers/indexes start on the same day
+        first_day = self.ticker_data_list[0].data[0].date
+
         self.missing_dates = self.ticker_data_list[0].getMissingDays()
+        # find missing days from tickers
         for ticker in self.ticker_data_list:
+            assert ticker.data[0].date == first_day
             tmp_missing_dates = ticker.getMissingDays()
             for tmp in tmp_missing_dates:
                 if tmp not in self.missing_dates:
                     self.missing_dates.append(tmp)
-        
+
+        # find missing days from indexes
         for index in self.index_data_list:
+            assert index.data[0].date == first_day
             tmp_missing_dates = index.getMissingDays()
             for tmp in tmp_missing_dates:
                 if tmp not in self.missing_dates:
                     self.missing_dates.append(tmp)
-        
+
         self.missing_dates = sorted(self.missing_dates)
 
+        # remove missing days from all stored tickers
         for ticker in self.ticker_data_list:
             deleted = ticker.removeByDays(self.missing_dates)
 
         for ticker in self.index_data_list:
             deleted = ticker.removeByDays(self.missing_dates)
-        
 
+    def getMetaText(self):
+        sep_str = ""
+        for i in range(0, 80):
+            sep_str += "*"
+        sep_str += "\n"
+
+        meta_text = sep_str
+        meta_text += f'Comparison engine ranging [{self.startDate.date()} - {self.endDate.date()}]\n'
+        meta_text += f'\nContains {len(self.index_data_list)} indexes:\n'
+        for entry in self.index_data_list:
+            meta_text += str(entry)+'\n'
+
+        meta_text += f'\nContains {len(self.ticker_data_list)} tickers:\n'
+        for entry in self.ticker_data_list:
+            meta_text += str(entry)+'\n'
+        meta_text += sep_str
+
+        return meta_text
+
+    def printMeta(self):
+        print(self.getMetaText())
+
+    def getDateRange(self):
+        return self.startDate, self.endDate
+
+
+class ComparisonEngine(TickerDataContainer):
     def __str__(self):
         return f"Comparison for [{self.startDate}-{self.endDate}] with {len(self.ticker_data_list)} tickers and {len(self.index_data_list)} indexes"
 
     def __repr__(self):
         return self.__str__()
-
-    def printMeta(self):
-        sep_str = ""
-        for i in range(0, 80):
-            sep_str += "*"
-
-        print(sep_str)
-        print(
-            f'Comparison engine ranging [{self.startDate} - {self.endDate}]')
-        print(f'\nContains {len(self.index_data_list)} indexes:')
-        for entry in self.index_data_list:
-            print(entry)
-
-        print(f'\nContains {len(self.ticker_data_list)} tickers:')
-        for entry in self.ticker_data_list:
-            print(entry)
-        print(sep_str)
-
-    def getDateRange(self):
-        return self.startDate, self.endDate
 
     def getPercentageChanges(self, include_indexes=True, req_names=[]):
         # filter out only supplied tickers if requested
@@ -106,10 +120,10 @@ class ComparisonEngine:
         return dates, names, changes
 
     def getTickerPercentageChange(self, targetName):
-        for ticker in self.ticker_data_list:
-            if (ticker.ticker_name == targetName):
-                return ticker.getPercentageChanges()
-        return ([], [])
+        if self.getTicker(targetName):
+            return self.getTicker(targetName).getPercentageChanges()
+        else:
+            return ([], [])
 
     def getTicker(self, targetName):
         for ticker in self.ticker_data_list:
@@ -119,10 +133,3 @@ class ComparisonEngine:
 
     def getAverageIndexChanges(self):
         return getAverageChanges(self.index_data_list)
-
-    def runPercentageComparisonWithIndex(self):
-        # index_changes = []
-
-        # for index_data in self.index_data_list:
-
-        return []

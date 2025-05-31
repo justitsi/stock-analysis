@@ -5,10 +5,10 @@ class TickerDataEntry:
     def __init__(self, name: str, high: float, low: float,
                  open: float, close: float, vol: int, date):
         self.name = str(name)
-        self.high = high
-        self.low = low
-        self.open = open
-        self.close = close
+        self.high = float(high)
+        self.low = float(low)
+        self.open = float(open)
+        self.close = float(close)
         self.vol = int(vol)
         self.date = date
 
@@ -30,7 +30,8 @@ class TickerData:
         self.date_created = datetime.now()
 
     def __str__(self):
-        return f"{self.ticker_name} with {len(self.data)} entries"
+        start, end = self.getDateRange()
+        return f"{self.ticker_name}: [{start}:{end}] with {len(self.data)} entries"
 
     def __repr__(self):
         return self.__str__()
