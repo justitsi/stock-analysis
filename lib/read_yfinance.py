@@ -3,6 +3,7 @@ import os
 import pickle
 from lib.data_objects import TickerData, TickerDataEntry
 from datetime import datetime
+from lib.util import tryMakeDir
 
 
 CACHE_LOC = './yfinance_cache'
@@ -86,10 +87,7 @@ def fetch_data(ticker_name):
 
 
 def save_to_cache(ticker_data_obj):
-    try:
-        os.mkdir(CACHE_LOC)
-    except FileExistsError:
-        pass
+    tryMakeDir(CACHE_LOC)
 
     file_handle = open(
         f'./{CACHE_LOC}/{ticker_data_obj.ticker_name}.pkl', 'wb')

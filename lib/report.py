@@ -2,6 +2,7 @@ from lib.engine_objects import ComparisonEngine
 from lib.math_util import getTrendLine, countEntriesAboveLine, getAverageDistance
 import numpy as np
 import matplotlib.pyplot as plt
+from lib.util import tryMakeDir
 
 
 def generateTickerChart(dates, changes, compare, name, comapre_name, reportDir):
@@ -56,6 +57,9 @@ def getTickerSummary(name, dates, changes, compare, reportDir):
 
 
 def generateReport(startDate, endDate, tickers, indexes, interestingTickers, reportDir='./report_output'):
+    tryMakeDir(reportDir)
+    tryMakeDir(f"{reportDir}/plots")
+    
     comparison = ComparisonEngine(tickers, indexes, startDate, endDate)  # nopep8
     comparison.printMeta()
 
