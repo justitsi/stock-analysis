@@ -26,8 +26,8 @@ if __name__ == "__main__":
         index_entries.append(data_entries.pop(12))
 
     # arm start
-    start = datetime(2025, 6, 3)
-    # start = datetime(2024, 3, 20)
+    # start = datetime(2025, 6, 3)
+    start = datetime(2023, 9, 14)
     # start = datetime.now() - timedelta(days=11)
 
     stock_start, stock_end = data_entries[0].getDateRange()

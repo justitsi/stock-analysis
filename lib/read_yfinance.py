@@ -8,8 +8,8 @@ from lib.util import tryMakeDir
 
 CACHE_LOC = './yfinance_cache'
 
-TICKER_NAMES = ['AMD', 'AAPL', 'ARM', 'AMZN', 'TSM', 'ORCL', 'CSCO', 'AVGO', 'COMP',
-                'GOOGL', 'IBM', 'INTC', 'META', 'MSFT', 'NVDA', 'QCOM', "NDX"]
+TICKER_NAMES = ['ASML', 'TSLA', 'AMD', 'AAPL', 'ARM', 'AMZN', 'TSM', 'ORCL', 'CSCO', 'AVGO', 'COMP',
+                'GOOGL', 'IBM', 'INTC', 'META', 'MSFT', 'MRVL', 'MU', 'TXN', 'SNPS', 'NVDA', 'QCOM', "NDX"]
 
 RANGE = '2y'
 

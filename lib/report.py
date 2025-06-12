@@ -18,6 +18,7 @@ def generateTickerChart(dates, changes, compare, name, comapre_name, reportDir):
     if (reportDir):
         plt.xticks(rotation=20)
         plt.savefig(f"{reportDir}/plots/{name}.png", dpi=200)
+        plt.close()
         plt.figure()
 
 
