@@ -71,13 +71,13 @@ class TickerDataContainer:
 
 
 class SimulationEngine(TickerDataContainer):
-    def __init__(self, ticker_data_list, index_data_list, startDate, endDate, strategy):
+    def __init__(self, ticker_data_list, index_data_list, startDate, endDate, strategy_list):
         # cleanup dates from input
         super().__init__(ticker_data_list, index_data_list, startDate, endDate)
 
         self.simStep = 0
         self.maxSteps = len(self.index_data_list[0].data) - 1
-        self.strategy = strategy
+        self.strategy_list = strategy_list
         self.dateList = self.getDateList()
 
         # set Ticker and Index prices
@@ -102,7 +102,8 @@ class SimulationEngine(TickerDataContainer):
 
     def updatePricesAndStrat(self):
         self.updatePriceInfo()
-        self.strategy.updateState(self.currentDate, self.currentTickers, self.currentIndexes)  # nopep8
+        for strategy in self.strategy_list:
+            strategy.updateState(self.currentDate, self.currentTickers, self.currentIndexes)  # nopep8
 
     def takeSimStep(self):
         # update object state

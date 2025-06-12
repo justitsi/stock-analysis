@@ -32,13 +32,27 @@ class BaseStrategy():
     def __init__(self, capital: float):
         self.positions = []
 
-        self.balance = float(capital)
-        self.capital = float(capital)
+        self.balance = round(float(capital), 2)
+        self.capital = round(float(capital), 2)
 
         self.currentDate = None
         self.currentTickers = []
         self.currentIndexes = []
         self.assetValues = []
+
+    def getBestAssetValue(self):
+        max_value = self.assetValues[0]
+        for value in self.assetValues:
+            if value > max_value:
+                max_value = value
+        return max_value
+    
+    def getWorstAssetValue(self):
+        min_value = self.assetValues[0]
+        for value in self.assetValues:
+            if value < min_value:
+                min_value = value
+        return min_value
 
     def getTickerByName(self, name):
         tickerData = None
@@ -66,7 +80,7 @@ class BaseStrategy():
             posTickerData = self.getTickerByName(pos.tickerName)
             tmp += pos.getValue(posTickerData.getPrice())
 
-        return tmp
+        return round(tmp, 2)
 
     def openPosition(self, tickerDataEntry: TickerDataEntry, amount: float):
         price = tickerDataEntry.getPrice()
@@ -111,6 +125,31 @@ class BasicStrategy(BaseStrategy):
         super().__init__(capital)
         self.stockToBuy = str(stockToBuy)
         self.amount = amount
+
+    def processUpdate(self):
+        # find price of ticker that the strategy uses
+        tickerData = self.getTickerByName(self.stockToBuy)
+
+        # debug print
+        # print(f"{self.currentDate} - {self.balance} - {tickerData.name} - {tickerData.getPrice()}")  # nopep8
+        # print(f"Total assets={self.getTotalAssetValue()}")
+
+        openPos = self.getOpenPositions()
+        if (len(openPos)>0):
+            for pos in openPos:
+                # check if the position is worth more than we bought it for and sell if it is
+                currentTickerData = self.getTickerByName(pos.tickerName)
+                if (pos.getProfit(currentTickerData.getPrice()) > 0):
+                    self.closePosition(pos)
+        else:
+            self.openPosition(tickerData, self.amount)
+
+
+class BasicStrategy2(BaseStrategy):
+    def __init__(self, capital: float, stockToBuy: str):
+        super().__init__(capital)
+        self.stockToBuy = str(stockToBuy)
+        self.historicalData = []
 
     def processUpdate(self):
         # find price of ticker that the strategy uses

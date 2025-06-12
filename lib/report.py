@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from lib.util import tryMakeDir
 from markdown_pdf import MarkdownPdf, Section
+from datetime import datetime
 
 def generateTickerChart(dates, changes, compare, name, comapre_name, reportDir):
     plt.plot(dates, changes, label=name)
@@ -91,6 +92,7 @@ def generateReport(startDate, endDate, tickers, indexes, interestingTickers, rep
     plt.figure()
 
     report_text = f"# Report [{startDate} - {endDate}]\n\n"
+    report_text += f'<small>Generated on {datetime.now()}</small>\n\n'
     report_text += f'Report spans a total of {len(changes[0])} work days. The best performing stocks in the time period were:\n\n'
 
     dates, names, changes = comparison.getPercentageChanges(include_indexes=False, req_names=[])  # nopep8

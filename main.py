@@ -6,6 +6,24 @@ import matplotlib.pyplot as plt
 
 READ_LOCAL_NASDAQ = False
 
+def printStrategiesSummary(type, strat_list):
+    print (f"{type} starts made:")
+
+    for index in range(0, len(strat_list)):
+        strat = strat_list[index]
+        strat_name = strat.stockToBuy
+        print(f"Strategy {strat_name} has made ${strat.getTotalAssetValue()-strat.capital}")    
+        print(f"Best assets: {strat.getBestAssetValue()}, Worst assets: {strat.getWorstAssetValue()}")
+
+    # plt.subplot(3, 3, index+1)
+        # plt.xticks(rotation=30)
+        # plt.legend()
+        # plt.figure()
+    #     plt.plot(simEngine.getDateList(), strat.assetValues, label=strat_name)
+    # fig = plt.gcf()
+    # fig.tight_layout()
+    # plt.show()
+
 if __name__ == "__main__":
     if (READ_LOCAL_NASDAQ):
         from lib.read_nasdaq import read_data
@@ -37,17 +55,17 @@ if __name__ == "__main__":
 
     stock_end = stock_end
 
+    # interestingTickers = ["AMD", "ARM", "INTC", "NVDA", "META", "IBM", "MSFT", "QCOM"]  # nopep8
     interestingTickers = ["AMD", "ARM", "INTC", "NVDA", "META", "IBM", "MSFT", "QCOM"]  # nopep8
-    generateReport(start.date(), stock_end.date(), data_entries, index_entries, interestingTickers, buildMD=False)  # nopep8
 
-    # strat = BasicStrategy(1000, 'AMD', 1)
+    # generateReport(start.date(), stock_end.date(), data_entries, index_entries, interestingTickers, buildMD=False)  # nopep8
+    strat_list = [] 
+    for ticker in interestingTickers:
+        strat_list.append(BasicStrategy(1000, ticker, 2))
 
-    # simEngine = SimulationEngine(data_entries, index_entries, start.date(), stock_end.date(), strat)
-    # simEngine.runSim()
- 
-    # print(f"Strategy has made ${strat.getTotalAssetValue()-strat.capital}")    
+    simEngine = SimulationEngine(data_entries, index_entries, start.date(), stock_end.date(), strat_list)
+    simEngine.runSim()
 
-    # plt.figure()
-    # plt.plot(simEngine.getDateList(), strat.assetValues)
-    # plt.show()
+    printStrategiesSummary
+        
 
