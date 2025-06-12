@@ -46,14 +46,19 @@ def getTickerSummary(name, dates, changes, compare, reportDir):
     generateTickerChart(dates, changes, compare, name, "Index_avg", reportDir)
     stats = getTickerStats(name, dates, changes, compare)
 
-    text = f"## {name}\n\n"
+    text = f"<h2 id={name}>{name}</h2>\n\n"
     text += f"![{name} performance plot](./plots/{name}.png)\n\n"
     text += f"* Price change: {stats['price_change']}%\n"
     text += f"* Beat index movements {stats['days_index']}/{len(dates)} days ({stats['pcnt_index']}%)\n"
     text += f"* Beat start price {stats['days_start']}/{len(dates)} days ({stats['pcnt_start']}%)\n"
     text += f"* Average distance from index: {stats['avg_index_dist']}%\n\n"
+    text += f"[See more on yfinance](https://finance.yahoo.com/quote/{name})"
 
     return text, stats
+
+
+def addLink(name):
+    return f"[{name}](#{name})"
 
 
 def generateReport(startDate, endDate, tickers, indexes, interestingTickers, reportDir='./report_output'):
@@ -78,7 +83,7 @@ def generateReport(startDate, endDate, tickers, indexes, interestingTickers, rep
     plt.savefig(f"{reportDir}/plots/overview.png", dpi=100)
     plt.figure()
 
-    report_text = f"# Report [{startDate.date()} - {endDate.date()}]\n\n"
+    report_text = f"# Report [{startDate} - {endDate}]\n\n"
     report_text += f'Report spans a total of {len(changes[0])} work days. The best performing stocks in the time period were:\n\n'
 
     dates, names, changes = comparison.getPercentageChanges(include_indexes=False, req_names=[])  # nopep8
@@ -103,10 +108,10 @@ def generateReport(startDate, endDate, tickers, indexes, interestingTickers, rep
     table_txt = "|Rank|By price change|By time beat indexes|By time beat start| By average index distance|\n|-|-|-|-|-|\n"
     for i in range(1, len(stock_performance)+1):
         table_txt += f"|{i}|"
-        table_txt += f"{vs_price_perf[i-1]['name']}: {vs_price_perf[i-1]['price_change']}%|"
-        table_txt += f"{vs_index_perf[i-1]['name']}: {vs_index_perf[i-1]['pcnt_index']}%|"
-        table_txt += f"{vs_start_perf[i-1]['name']}: {vs_start_perf[i-1]['pcnt_start']}%|"
-        table_txt += f"{avg_index_dist[i-1]['name']}: {avg_index_dist[i-1]['avg_index_dist']}%|"
+        table_txt += f"{addLink(vs_price_perf[i-1]['name'])}: {vs_price_perf[i-1]['price_change']}%|"
+        table_txt += f"{addLink(vs_index_perf[i-1]['name'])}: {vs_index_perf[i-1]['pcnt_index']}%|"
+        table_txt += f"{addLink(vs_start_perf[i-1]['name'])}: {vs_start_perf[i-1]['pcnt_start']}%|"
+        table_txt += f"{addLink(avg_index_dist[i-1]['name'])}: {avg_index_dist[i-1]['avg_index_dist']}%|"
         table_txt += "\n"
 
     report_text += table_txt + "\n"

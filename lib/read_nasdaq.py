@@ -14,7 +14,7 @@ def parse_date(date_str):
     day = int(date_str[3:5])
     year = int(date_str[6:10])
 
-    return datetime.datetime(year, month, day)
+    return datetime.datetime(year, month, day).date()
 
 
 def read_data(folder_name):

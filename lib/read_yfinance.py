@@ -11,12 +11,12 @@ CACHE_LOC = './yfinance_cache'
 TICKER_NAMES = ['AMD', 'AAPL', 'ARM', 'AMZN', 'TSM', 'ORCL', 'CSCO', 'AVGO', 'COMP',
                 'GOOGL', 'IBM', 'INTC', 'META', 'MSFT', 'NVDA', 'QCOM', "NDX"]
 
-RANGE = '1y'
+RANGE = '2y'
 
 
 def parseDate(pd_timestamp):
     date_with_offset = pd_timestamp.to_pydatetime()
-    return date_with_offset.replace(tzinfo=None)
+    return date_with_offset.replace(tzinfo=None).date()
 
 
 def read_data():

@@ -1,7 +1,10 @@
 import numpy as np
 from datetime import datetime, timedelta
 
+
 class TickerDataEntry:
+    __slots__ = ('name', 'high', 'low', 'open', 'close', 'vol', 'date')
+
     def __init__(self, name: str, high: float, low: float,
                  open: float, close: float, vol: int, date):
         self.name = str(name)
@@ -13,16 +16,18 @@ class TickerDataEntry:
         self.date = date
 
     def __str__(self):
-        return f"{self.name} on {self.date}"
+        return f"{self.name} on {self.date}: {self.getPrice()}"
 
     def __repr__(self):
         return self.__str__()
 
     def getPrice(self):
-        return self.close
+        return round(self.close, 2)
 
 
 class TickerData:
+    __slots__ = ('ticker_name', 'source_file', 'data', 'date_created')
+
     def __init__(self, ticker_name: str, source_file: str, data):
         self.ticker_name = ticker_name
         self.source_file = source_file
@@ -38,6 +43,7 @@ class TickerData:
 
     def check_range_input(self, startDate, endDate):
         current_start, current_end = self.getDateRange()
+
         assert startDate >= current_start
         assert endDate <= current_end
 
@@ -50,15 +56,34 @@ class TickerData:
             if (data_entry.date >= startDate and data_entry.date <= endDate):
                 new_data.append(data_entry)
 
+        # double check we've set the dates correctly
+        assert (startDate == new_data[0].date)
+        assert (endDate == new_data[-1].date)
+
         self.data = new_data
+
+    def getDateList(self):
+        date_list = []
+
+        for entry in self.data:
+            date_list.append(entry.date)
+
+        return date_list
 
     def getDateRange(self):
         return (self.data[0].date, self.data[-1].date)
 
+    def getPriceByDate(self, date):
+        for entry in self.data:
+            if (entry.date == date):
+                return entry
+
+        raise Exception(f"No {self.ticker_name} entry found for {date}")
+
     def getMissingDays(self):
         missing = []
-        
-        for index in range (1, len(self.data)):
+
+        for index in range(1, len(self.data)):
             prev_day = self.data[index-1].date
             curr_day = self.data[index].date
             diff_days = (curr_day - prev_day).days
@@ -81,9 +106,9 @@ class TickerData:
 
         return removed
 
-    def removeByDay(self, day): 
+    def removeByDay(self, day):
         index = -1
-        for i in range (0, len(self.data)):
+        for i in range(0, len(self.data)):
             if self.data[i].date == day:
                 index = i
                 break
@@ -93,7 +118,7 @@ class TickerData:
         else:
             # remove entry if found
             self.data.pop(i)
-            return True             
+            return True
 
     def getPercentageChanges(self):
         dates = []
@@ -107,7 +132,7 @@ class TickerData:
             movements.append(new_price/old_price)
 
         # convert to numpy array to allow for faster onwards processing
-        movements = np.array(movements, dtype=np.float32)
+        movements = np.array(movements, dtype=np.float64)
         return (dates, movements)
 
     def getPrices(self):
@@ -115,4 +140,4 @@ class TickerData:
         for entry in self.data:
             prices.append(entry.getPrice())
 
-        return np.array(prices, dtype=np.float32)
+        return np.array(prices, dtype=np.float64)

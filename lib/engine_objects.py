@@ -58,6 +58,72 @@ class TickerDataContainer:
         for ticker in self.index_data_list:
             deleted = ticker.removeByDays(self.missing_dates)
 
+    def getDateRange(self):
+        return self.startDate, self.endDate
+
+    def getDateList(self):
+        all_dates = self.ticker_data_list[0].getDateList()
+
+        assert (all_dates[0] == self.startDate)
+        assert (all_dates[-1] == self.endDate)
+
+        return all_dates
+
+
+class SimulationEngine(TickerDataContainer):
+    def __init__(self, ticker_data_list, index_data_list, startDate, endDate, strategy):
+        # cleanup dates from input
+        super().__init__(ticker_data_list, index_data_list, startDate, endDate)
+
+        self.simStep = 0
+        self.maxSteps = len(self.index_data_list[0].data) - 1
+        self.strategy = strategy
+        self.dateList = self.getDateList()
+
+        # set Ticker and Index prices
+        self.updatePricesAndStrat()
+
+    def __str__(self):
+        return f"Trading engine [step {self.simStep}] for [{self.startDate}-{self.endDate}] with {len(self.ticker_data_list)} tickers and {len(self.index_data_list)} indexes"
+
+    def __repr__(self):
+        return self.__str__()
+
+    def updatePriceInfo(self):
+        self.currentDate = self.dateList[self.simStep]
+
+        self.currentTickers = []
+        for tmp in self.ticker_data_list:
+            self.currentTickers.append(tmp.getPriceByDate(self.currentDate))
+
+        self.currentIndexes = []
+        for tmp in self.index_data_list:
+            self.currentIndexes.append(tmp.getPriceByDate(self.currentDate))
+
+    def updatePricesAndStrat(self):
+        self.updatePriceInfo()
+        self.strategy.updateState(self.currentDate, self.currentTickers, self.currentIndexes)  # nopep8
+
+    def takeSimStep(self):
+        # update object state
+        self.simStep += 1
+        self.updatePricesAndStrat()
+
+    def runSim(self):
+        while (self.simStep < self.maxSteps):
+            self.takeSimStep()
+
+
+class ComparisonEngine(TickerDataContainer):
+    def __str__(self):
+        return f"Comparison for [{self.startDate}-{self.endDate}] with {len(self.ticker_data_list)} tickers and {len(self.index_data_list)} indexes"
+
+    def __repr__(self):
+        return self.__str__()
+
+    def printMeta(self):
+        print(self.getMetaText())
+
     def getMetaText(self):
         sep_str = ""
         for i in range(0, 80):
@@ -65,7 +131,7 @@ class TickerDataContainer:
         sep_str += "\n"
 
         meta_text = sep_str
-        meta_text += f'Comparison engine ranging [{self.startDate.date()} - {self.endDate.date()}]\n'
+        meta_text += f'Comparison engine ranging [{self.startDate} - {self.endDate}]\n'
         meta_text += f'\nContains {len(self.index_data_list)} indexes:\n'
         for entry in self.index_data_list:
             meta_text += str(entry)+'\n'
@@ -76,20 +142,6 @@ class TickerDataContainer:
         meta_text += sep_str
 
         return meta_text
-
-    def printMeta(self):
-        print(self.getMetaText())
-
-    def getDateRange(self):
-        return self.startDate, self.endDate
-
-
-class ComparisonEngine(TickerDataContainer):
-    def __str__(self):
-        return f"Comparison for [{self.startDate}-{self.endDate}] with {len(self.ticker_data_list)} tickers and {len(self.index_data_list)} indexes"
-
-    def __repr__(self):
-        return self.__str__()
 
     def getPercentageChanges(self, include_indexes=True, req_names=[]):
         # filter out only supplied tickers if requested
