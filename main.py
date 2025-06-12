@@ -26,28 +26,28 @@ if __name__ == "__main__":
         index_entries.append(data_entries.pop(12))
 
     # arm start
-    # start = datetime(2025, 5, 29)
-    start = datetime(2024, 3, 20)
+    start = datetime(2025, 6, 3)
+    # start = datetime(2024, 3, 20)
     # start = datetime.now() - timedelta(days=11)
 
     stock_start, stock_end = data_entries[0].getDateRange()
     # stock_end = stock_end - timedelta(days=3)
-    stock_end = datetime(2025, 6, 6)
+    stock_end = datetime(2025, 6, 10)
 
 
     stock_end = stock_end
 
     interestingTickers = ["AMD", "ARM", "INTC", "NVDA", "META", "IBM", "MSFT", "QCOM"]  # nopep8
-    # generateReport(start.date(), stock_end.date(), data_entries, index_entries, interestingTickers)  # nopep8
+    generateReport(start.date(), stock_end.date(), data_entries, index_entries, interestingTickers, buildMD=False)  # nopep8
 
-    strat = BasicStrategy(1000, 'AMD', 1)
+    # strat = BasicStrategy(1000, 'AMD', 1)
 
-    simEngine = SimulationEngine(data_entries, index_entries, start.date(), stock_end.date(), strat)
-    simEngine.runSim()
+    # simEngine = SimulationEngine(data_entries, index_entries, start.date(), stock_end.date(), strat)
+    # simEngine.runSim()
  
-    print(f"Strategy has made ${strat.getTotalAssetValue()-strat.capital}")    
+    # print(f"Strategy has made ${strat.getTotalAssetValue()-strat.capital}")    
 
-    plt.figure()
-    plt.plot(simEngine.getDateList(), strat.assetValues)
-    plt.show()
+    # plt.figure()
+    # plt.plot(simEngine.getDateList(), strat.assetValues)
+    # plt.show()
 

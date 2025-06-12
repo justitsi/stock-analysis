@@ -3,7 +3,7 @@ from lib.math_util import getTrendLine, countEntriesAboveLine, getAverageDistanc
 import numpy as np
 import matplotlib.pyplot as plt
 from lib.util import tryMakeDir
-
+from markdown_pdf import MarkdownPdf, Section
 
 def generateTickerChart(dates, changes, compare, name, comapre_name, reportDir):
     plt.plot(dates, changes, label=name)
@@ -16,7 +16,7 @@ def generateTickerChart(dates, changes, compare, name, comapre_name, reportDir):
     plt.legend()
 
     if (reportDir):
-        plt.xticks(rotation=15)
+        plt.xticks(rotation=20)
         plt.savefig(f"{reportDir}/plots/{name}.png", dpi=200)
         plt.figure()
 
@@ -42,17 +42,23 @@ def getTickerStats(name, dates, changes, compare):
     }
 
 
-def getTickerSummary(name, dates, changes, compare, reportDir):
+def getTickerSummary(name, dates, changes, compare, reportDir, buildMD=True):
     generateTickerChart(dates, changes, compare, name, "Index_avg", reportDir)
     stats = getTickerStats(name, dates, changes, compare)
 
     text = f"<h2 id={name}>{name}</h2>\n\n"
-    text += f"![{name} performance plot](./plots/{name}.png)\n\n"
+    if(buildMD):
+        text += f"![{name} performance plot](./plots/{name}.png)\n\n"
+    else:
+        text += f"![{name} performance plot](./{reportDir}/plots/{name}.png)\n\n"
+
     text += f"* Price change: {stats['price_change']}%\n"
     text += f"* Beat index movements {stats['days_index']}/{len(dates)} days ({stats['pcnt_index']}%)\n"
     text += f"* Beat start price {stats['days_start']}/{len(dates)} days ({stats['pcnt_start']}%)\n"
     text += f"* Average distance from index: {stats['avg_index_dist']}%\n\n"
     text += f"[See more on yfinance](https://finance.yahoo.com/quote/{name})"
+    if(not buildMD):
+        text += f'<div style="page-break-after: always;"></div>'
 
     return text, stats
 
@@ -61,7 +67,7 @@ def addLink(name):
     return f"[{name}](#{name})"
 
 
-def generateReport(startDate, endDate, tickers, indexes, interestingTickers, reportDir='./report_output'):
+def generateReport(startDate, endDate, tickers, indexes, interestingTickers, reportDir='./report_output', buildMD=True):
     tryMakeDir(reportDir)
     tryMakeDir(f"{reportDir}/plots")
     
@@ -91,7 +97,7 @@ def generateReport(startDate, endDate, tickers, indexes, interestingTickers, rep
     stock_text_body = ''
     for index in range(0, len(names)):
         tmp_txt, stats = getTickerSummary(
-            names[index], dates, changes[index], index_avg_changes, reportDir)
+            names[index], dates, changes[index], index_avg_changes, reportDir, buildMD)
         stock_text_body += tmp_txt
         stock_performance.append(stats)
 
@@ -115,9 +121,20 @@ def generateReport(startDate, endDate, tickers, indexes, interestingTickers, rep
         table_txt += "\n"
 
     report_text += table_txt + "\n"
-    report_text += f"![Report Summary](./plots/overview.png)\n"
+    if (buildMD):
+        report_text += f"![Report Summary](./plots/overview.png)\n"
+    else:
+        report_text += f"![Report Summary](./{reportDir}/plots/overview.png)\n"
+
     report_text += "\n" + stock_text_body
 
-    report_handle = open(f"{reportDir}/report.md", 'w')
-    report_handle.write(report_text)
-    report_handle.close()
+    if (buildMD):
+        report_handle = open(f"{reportDir}/report.md", 'w')
+        report_handle.write(report_text)
+        report_handle.close()
+    else:
+        # now also save this to PDF
+        pdf = MarkdownPdf(toc_level=2, optimize=True)
+
+        pdf.add_section(Section(report_text))
+        pdf.save(f"{reportDir}/report.pdf")
